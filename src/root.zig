@@ -1,5 +1,57 @@
 const std = @import("std");
+const fmt = std.fmt;
 const testing = std.testing;
+
+pub fn parseJsonNumber(Type: type, input: []const u8) Type {
+    _ = input;
+    @panic("not implemented");
+}
+
+const JsonIntError = error{
+    EmptyString,
+    NoNumberFound,
+    InvalidCharacter,
+};
+
+pub fn parseJsonPositiveInteger(input: []const u8) JsonIntError!struct { []const u8, usize } {
+    if (input.len == 0) {
+        return error.EmptyString;
+    }
+    var index: usize = 0;
+    var result: usize = 0;
+    for (input) |char| {
+        if ('0' > char or char > '9') {
+            break;
+        }
+        result *= 10;
+        result += (char - '0');
+        index += 1;
+    }
+    if (index == 0) {
+        return error.NoNumberFound;
+    }
+    return .{ input[index..], result };
+}
+
+test "parse json positive integer - base case" {
+    const expected = 42;
+    const remaining = "other text";
+    const actual = try parseJsonPositiveInteger("42other text");
+    try testing.expectEqualStrings(remaining, actual[0]);
+    try testing.expectEqual(expected, actual[1]);
+}
+
+test "parse json positive integer - empty string" {
+    const expected = JsonIntError.EmptyString;
+    const actual = parseJsonPositiveInteger("");
+    try testing.expectEqual(expected, actual);
+}
+
+test "parse json positive integer - no number" {
+    const expected = JsonIntError.NoNumberFound;
+    const actual = parseJsonPositiveInteger("other text");
+    try testing.expectEqual(expected, actual);
+}
 
 pub const JsonStringError = error{
     WrongDelimiters,
