@@ -242,22 +242,25 @@ test "parseFractionNumberChars.noNumberChars" {
     try testing.expectEqual(0, actual[1]);
 }
 
-pub fn parseNumberSign(input: []const u8) struct { []const u8, f64 } {
+pub fn parseNumberSign(T: type, input: []const u8) ?struct { []const u8, T } {
+    if (input.len == 0) {
+        return null;
+    }
     return switch (input[0]) {
-        '-' => .{ input[1..], -1.0 },
-        '+' => .{ input[1..], 1.0 },
-        else => .{ input, 1.0 },
+        '-' => .{ input[1..], -1 },
+        '+' => .{ input[1..], 1 },
+        else => .{ input, 1 },
     };
 }
 
 test "parseNumberSign.baseCase" {
-    const actual = parseNumberSign("-123");
+    const actual = parseNumberSign(f64, "-123") orelse @panic("should not be reached");
     try testing.expectEqualStrings("123", actual[0]);
     try testing.expectEqual(-1.0, actual[1]);
 }
 
 test "parseNumberSign.withoutSign" {
-    const actual = parseNumberSign("123");
+    const actual = parseNumberSign(f64, "123") orelse @panic("should not be reached");
     try testing.expectEqualStrings("123", actual[0]);
     try testing.expectEqual(1.0, actual[1]);
 }

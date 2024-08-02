@@ -10,7 +10,7 @@ const JsonFloatError = error{
 
 pub fn parseJsonFloat(input: []const u8) JsonFloatError!struct { []const u8, f64 } {
     var text = input;
-    const signResult = util.parseNumberSign(text);
+    const signResult = util.parseNumberSign(f64, text) orelse return JsonFloatError.EmptyInput;
     text = signResult[0];
     const sign = signResult[1];
     const integerResult = util.parseNumberCharsWithoutExtraZeros(text) catch |err| {
